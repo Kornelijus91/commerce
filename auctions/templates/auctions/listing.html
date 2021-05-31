@@ -1,0 +1,77 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+    <h2>{{ listing.title }}</h2>
+    <p>{{ listing.description }}</p>
+    {% if listing.imgurl %}
+        <img src="{{ listing.imgurl }}"></img>
+    {% endif %}
+    <p>Current highest bid:{{ listing.listing_bid.bid }}</p>
+    {% if message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% if listing.active == True %}
+            <form action="{% url 'bid' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ bidform }}
+                <input type="submit" value="Place Bid"></input>
+            </form>
+        {% endif %}
+    {% endif %}
+    {% if user.is_authenticated %}
+            <form action="{% url 'watchlist' listing.id %}" method="post">
+                {% csrf_token %}
+                <input type="submit" value="{{ inwatchlist }}"></input>
+            </form>
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% if listing.active == False %}
+            {% if listing.ownerid == listing.winnerid %}
+                <h2>No winners.</h2>
+            {% else %}
+                {% if listing.winnerid == user.id %}
+                    <h2>Congratulations! You won this item!</h2>
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% if listing.active == True %}
+            {% if user.id == listing.ownerid %}
+                <form action="{% url 'closelisting' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Close listing"></input>
+                </form>
+            {% endif %}
+        {% endif %}
+    {% endif %}
+    {% if comments %}
+        <h5>Comments:</h5>
+        <hr>
+        <ul>
+            {% for comment in comments %}
+                <li>
+                    <h5>{{ comment.commenterName }}:</h5>
+                    <p>{{ comment.comment }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        <hr>
+    {% else %}
+        <h5>No comments.</h5>
+        <hr>
+    {% endif %}
+    {% if user.is_authenticated %}
+        {% if listing.active == True %}
+            <form action="{% url 'comment' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ commentform }}
+                <input type="submit" value="Submit comment"></input>
+            </form>
+        {% endif %}
+    {% endif %}
+{% endblock %}
